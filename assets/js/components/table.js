@@ -10,19 +10,29 @@ export default class Table extends React.Component {
     this.state = {
       userId: this.props.userId,
       tableId: this.props.id,
-      leftBoard: {},
-      rightBoard: {}
+      leftBoard: {player:null},
+      rightBoard: {player:null}
     };
     this.channel = channels.tableChannel(this.state.tableId, this.state.userId);
-    this.channel.join()
+    this
+      .channel
+      .join()
       .receive("error", () => {
         console.log("Invalid room or userId")
       });
 
-    this.channel.on("board", (state)=>{
-      this.state.leftBoard = state[0];
-      this.state.rightBoard = state[1];
-    });
+    this
+      .channel
+      .on("board", (state) => {
+        this.state.leftBoard = state.left;
+        this.state.rightBoard = state.right;
+      });
+  }
+  leftClaimed() {
+    console.log('left');
+  }
+  rightClaimed() {
+    console.log('right');
   }
 
   render() {
@@ -30,13 +40,24 @@ export default class Table extends React.Component {
     return (
       <div className="row">
         <div className={"col md-6"}>
-        {/* readonly={this.state.leftBoard.player != this.state.userId} */}
-          <Board board={this.state.leftBoard} className={"col md-6"}/>
+          <Board
+            board={this.state.leftBoard}
+            onClaimed={this
+            .leftClaimed
+            .bind(this)}
+            className={"col md-6"}/>
         </div>
         <div className={"col md-6"}>
-          <Board board={this.state.rightBoard} className={"col md-6"}/>
+          <Board
+            board={this.state.rightBoard}
+            onClaimed={this
+            .rightClaimed
+            .bind(this)}
+            className={"col md-6"}/>
         </div>
       </div>
     );
   }
 };
+{/* readonly={this.state.leftBoard.player != this.state.userId} */
+}

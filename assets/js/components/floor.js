@@ -34,9 +34,7 @@ export default class Floor extends React.Component {
         <div className={"form-group row"}>
           <button
             className={"btn btn-info"}
-            onClick={this
-            .CreateTable
-            .bind(this)}>Create Table</button>
+            onClick={this.CreateTable.bind(this)}>Create Table</button>
         </div>
         <div className={"input-group"}>
           <input
@@ -47,9 +45,7 @@ export default class Floor extends React.Component {
           <span className={"input-group-btn"}>
             <button
               className={"btn btn-success"}
-              onClick={this
-              .JoinTable
-              .bind(this)}>Join Table</button>
+              onClick={this.JoinTable.bind(this)}>Join Table</button>
           </span>
         </div>
       </form>

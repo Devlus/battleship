@@ -13,8 +13,7 @@ export default class Board extends React.Component {
     };
   }
 
-  render() {
-    debugger;
+  renderTable(){
     return (
       <table>
         {this.state.grid.map((y,j) =>
@@ -22,5 +21,12 @@ export default class Board extends React.Component {
         )}
       </table>
     );
+  }
+  render() {
+    if(!this.props.board.player){
+      return (<button onClick={this.props.onClaimed}>Claim Side</button>)
+    }else{
+      return this.renderTable()
+    }
   }
 };
