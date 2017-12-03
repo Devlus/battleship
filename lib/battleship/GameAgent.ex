@@ -1,11 +1,12 @@
 # From Nat's Notes
 defmodule Battleship.GameAgent do
   use GenServer
+  alias Battleship.BoardState
 
   ## Public Interface
 
   def start_link(id) do
-    state0 = %{player1: nil, player2: nil, players: []}
+    state0 = %{players: [], left: %BoardState{}, right: %BoardState{} }
     GenServer.start_link(__MODULE__, state0, name: {:via, Battleship.Registry, {:id, id}})
   end
   def add_player(id)do
@@ -13,6 +14,10 @@ defmodule Battleship.GameAgent do
   end
   def has_player(id, player_id) do
     GenServer.call({:via, Battleship.Registry, {:id, id}}, {:has_player, player_id})
+  end
+
+  def claim_side(id, side) do
+    GenServer.call({:via, Battleship.Registry, {:id, id}}, {:claim, side})
   end
 
   def get(id, key) do
@@ -32,10 +37,20 @@ defmodule Battleship.GameAgent do
     players = Map.get(state, :players)
     {:reply, Enum.any?(players,fn x -> x == id end), state}
   end
+  def handle_call({:claim, side}, _from, state) do
+    side_state = Map.get(state, elem(side,0)) #:left or :right
+    if(!is_nil(side_state.user)) do
+      {:reply, {:error, state}, state}
+    end
+    side_state = %{side_state | user: elem(side,1)}
+    state = Map.put(state, elem(side,0), side_state)
+    {:reply, {:ok, state}, state}
+  end
 
   def handle_call({:add_player}, _from, state) do
     players = Map.get(state, :players)
-    new_id = if (is_nil(List.last(players))), do: 0, else: ( Enum.max(players) + 1)
+    # start with 1 so it is a truthy value in JS
+    new_id = if (is_nil(List.last(players))), do: 1, else: ( Enum.max(players) + 1)
     players = [new_id | players ]
     {:reply, new_id, Map.put(state, :players, players)}
   end

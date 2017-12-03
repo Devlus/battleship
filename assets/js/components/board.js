@@ -8,24 +8,27 @@ export default class Board extends React.Component {
     super(props);
     this.channel = this.props.channel
     this.state = {
-      grid: Array(10).fill(Array(10).fill(0))
-      // playerNumber: this.props.playerNumber
+      grid: Array(10).fill(Array(10).fill(0)),
     };
   }
 
-  renderTable(){
+  renderTable() {
     return (
       <table>
-        {this.state.grid.map((y,j) =>
-            (<tr>{y.map((x,i) => (<td className={"cell"} >{i},{j}</td>))}</tr>)
-        )}
+        {this.state.grid.map((y, j) => (
+            <tr>{y.map((x, i) => (
+                <td className={"cell"}>{i},{j}</td>
+              ))}</tr>
+          ))}
       </table>
     );
   }
   render() {
-    if(!this.props.board.player){
-      return (<button onClick={this.props.onClaimed}>Claim Side</button>)
-    }else{
+    if (!this.props.board || !this.props.board.user) {
+      return (
+        <button onClick={this.props.onClaimed}>Claim Side</button>
+      )
+    } else {
       return this.renderTable()
     }
   }

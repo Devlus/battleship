@@ -38,6 +38,7 @@ defmodule Battleship.Registry do
     {:ok, Map.new}
   end
   def handle_call({:whereis_name, id}, _from, state) do
+    IO.inspect(state)
     {:reply, Map.get(state, id, :undefined), state}
   end
   def handle_call({:register_name, id, pid}, _from, state) do

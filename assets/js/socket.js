@@ -11,7 +11,7 @@ let socket = new Socket("/socket", {
 socket.connect();
 export const channels = {
   floorChannel: socket.channel("floor:lobby", {}),
-  tableChannel: (id, userId)=> socket.channel(`table:${id}`, {user_id: userId})
+  tableChannel: (id)=> socket.channel(`table:${id}`)
 }
 
 // When you connect, you'll often need to authenticate the client. For example,

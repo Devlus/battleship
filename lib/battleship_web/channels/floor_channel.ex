@@ -14,8 +14,8 @@ defmodule BattleshipWeb.FloorChannel do
   def handle_in("create", payload, socket) do
     id = Integer.to_string(DateTime.to_unix(DateTime.utc_now()))
     Battleship.ProcRegistry.start_table(id)
-    user_id = Battleship.GameAgent.add_player(id)
-    {:reply, {:created, %{code: id, user_id: user_id }}, socket}
+    # user_id = Battleship.GameAgent.add_player(id)
+    {:reply, {:created, %{code: id}}, socket}
   end
 
   # It is also common to receive messages from the client and

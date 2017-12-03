@@ -20,12 +20,11 @@ export default class Floor extends React.Component {
       .push("create", {})
       .receive("created", (resp) => {
         this.setState({tableCode: resp.code});
-        this.setState({userId: resp.user_id});
       });
   }
   JoinTable(e) {
     e.preventDefault();
-    this.props.onGotCode(this.state.tableCode, this.state.userId);
+    this.props.onGotCode(this.state.tableCode);
   }
 
   render() {

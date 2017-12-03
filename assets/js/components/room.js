@@ -12,16 +12,18 @@ export default class Room extends React.Component {
     }
   }
 
-  moveToTable(code, userId) {
+  moveToTable(code) {
     this.setState({code: code})
-    this.setState({userId: userId})
+  }
+  onBadTable(reason){
+    this.setState({code: ''})
   }
 
   render() {
     if (!this.state.code) {
       return <Floor onGotCode={this.moveToTable.bind(this)}/>
     } else {
-      return <Table id={this.state.code} userId={this.state.userId}/>
+      return <Table onBadTable={this.onBadTable.bind(this)} id={this.state.code} userId={this.state.userId}/>
     }
   }
 }

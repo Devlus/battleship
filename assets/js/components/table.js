@@ -8,35 +8,36 @@ export default class Table extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      userId: this.props.userId,
+      userId: '',
       tableId: this.props.id,
-      leftBoard: {player:null},
-      rightBoard: {player:null}
+      leftBoard: {},
+      rightBoard: {}
     };
-    this.channel = channels.tableChannel(this.state.tableId, this.state.userId);
+    this.channel = channels.tableChannel(this.state.tableId);
     this
       .channel
       .join()
-      .receive("error", () => {
+      .receive("ok",(resp)=>{
+        this.setState({userId: resp.user_id})
+      }).receive("error", () => {
         console.log("Invalid room or userId")
       });
 
     this
       .channel
       .on("board", (state) => {
-        this.state.leftBoard = state.left;
-        this.state.rightBoard = state.right;
+        this.setState({leftBoard: state.left});
+        this.setState({rightBoard: state.right});
       });
   }
   leftClaimed() {
-    console.log('left');
+    this.channel.push("claim", {side: "left"})
   }
   rightClaimed() {
-    console.log('right');
+    this.channel.push("claim", {side: "right"})
   }
 
   render() {
-    debugger;
     return (
       <div className="row">
         <div className={"col md-6"}>
@@ -59,5 +60,3 @@ export default class Table extends React.Component {
     );
   }
 };
-{/* readonly={this.state.leftBoard.player != this.state.userId} */
-}
