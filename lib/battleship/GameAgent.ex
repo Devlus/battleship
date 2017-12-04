@@ -27,8 +27,17 @@ defmodule Battleship.GameAgent do
   def put(id, key, val) do
     GenServer.call({:via, Battleship.Registry, {:id, id}}, {:put, key, val})
   end
+  def get_state(id) do
+    GenServer.call({:via, Battleship.Registry, {:id, id}}, {:state})
+  end
+  def add_ship(id, user_id, side, shipName, cells) do
+    GenServer.call({:via, Battleship.Registry, {:id, id}}, {:place, user_id, side, shipName, cells })
+  end
 
   ## Process Implementation
+  def handle_call({:state}, _from, state) do
+    {:reply, state, state}
+  end
 
   def handle_call({:get, key}, _from, state) do
     {:reply, Map.get(state, key), state}
@@ -46,6 +55,24 @@ defmodule Battleship.GameAgent do
     state = Map.put(state, elem(side,0), side_state)
     {:reply, {:ok, state}, state}
   end
+  def handle_call({:place, user_id, side, shipName, cells}, _from, state) do
+    side = String.to_atom(side)
+    shipName = String.to_atom(shipName)
+    state_side = Map.get(state, side)
+
+    #only let the owner place ships
+    if(state_side.user == user_id) do
+      if(is_nil(Map.get(state_side.ships, shipName))) do
+        IO.inspect(cells)
+        state_side = %{state_side | ships: Map.put(state_side.ships, shipName, cells)}
+      end
+    end
+    state = Map.put(state, side, state_side)
+    {:reply, state, state}
+  end
+
+
+
 
   def handle_call({:add_player}, _from, state) do
     players = Map.get(state, :players)

@@ -35,8 +35,19 @@ defmodule BattleshipWeb.TableChannel do
 
   # It is also common to receive messages from the client and
   # broadcast to everyone in the current topic (table:lobby).
-  def handle_in("board", payload, socket) do
-    broadcast socket, "board", payload
+  def handle_in("need_state", payload, socket) do
+    table_id = socket.assigns[:table_id]
+    state = Battleship.GameAgent.get_state(table_id)
+    broadcast socket, "board", state
+    {:noreply, socket}
+  end
+  def handle_in("place", payload, socket) do
+    table_id = socket.assigns[:table_id]
+    user_id = socket.assigns[:user_id]
+    state = Battleship.GameAgent.add_ship(table_id, user_id, payload["side"], payload["name"], payload["cells"])
+    IO.puts("state: ")
+    IO.inspect(state)
+    broadcast socket, "board", state
     {:noreply, socket}
   end
 

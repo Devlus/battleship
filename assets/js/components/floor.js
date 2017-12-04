@@ -26,6 +26,9 @@ export default class Floor extends React.Component {
     e.preventDefault();
     this.props.onGotCode(this.state.tableCode);
   }
+  FieldChanged(e){
+    this.setState({tableCode: e.target.value});
+  }
 
   render() {
     return (
@@ -38,6 +41,8 @@ export default class Floor extends React.Component {
         <div className={"input-group"}>
           <input
             className={"form-control"}
+            onChange={this.FieldChanged.bind(this)}
+            // onBlur={() => this.props.actions.updateInput(this.state.tableCode)}
             type="text"
             placeholder="Code..."
             value={this.state.tableCode}/>

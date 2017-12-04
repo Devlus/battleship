@@ -14,11 +14,10 @@ export default class Table extends React.Component {
       rightBoard: {}
     };
     this.channel = channels.tableChannel(this.state.tableId);
-    this
-      .channel
-      .join()
+    this.channel.join()
       .receive("ok",(resp)=>{
         this.setState({userId: resp.user_id})
+        this.channel.push("need_state")
       }).receive("error", () => {
         console.log("Invalid room or userId")
       });
@@ -26,15 +25,17 @@ export default class Table extends React.Component {
     this
       .channel
       .on("board", (state) => {
+        console.log(state);
         this.setState({leftBoard: state.left});
         this.setState({rightBoard: state.right});
       });
   }
-  leftClaimed() {
-    this.channel.push("claim", {side: "left"})
+  claimed(side) {
+    this.channel.push("claim", {side: side})
   }
-  rightClaimed() {
-    this.channel.push("claim", {side: "right"})
+
+  placeShip(side, shipName, cells){
+    this.channel.push("place", {side: side, name: shipName, cells: cells})
   }
 
   render() {
@@ -43,17 +44,15 @@ export default class Table extends React.Component {
         <div className={"col md-6"}>
           <Board
             board={this.state.leftBoard}
-            onClaimed={this
-            .leftClaimed
-            .bind(this)}
+            onClaimed={()=>this.claimed("left")}
+            onPlaceShip={(ship, cells)=>this.placeShip("left", ship, cells)}
             className={"col md-6"}/>
         </div>
         <div className={"col md-6"}>
           <Board
             board={this.state.rightBoard}
-            onClaimed={this
-            .rightClaimed
-            .bind(this)}
+            onPlaceShip={(ship, cells)=>this.placeShip("right", ship, cells)}
+            onClaimed={()=>this.claimed("right")}
             className={"col md-6"}/>
         </div>
       </div>
