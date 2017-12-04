@@ -1,7 +1,27 @@
 /* This file is for your main application css. */
 @import 'bootstrap';
 
+.body{
+  font-family: monospace;
+}
 .cell{
   width: 40px;
   height: 40px;
+  .boat{
+    background-color: lightsteelblue;
+    padding: 10px;
+  }
+  .hit{
+    background-color: orangered;
+    padding: 10px;
+  }
+  .miss{
+    background-color: hotpink;
+    padding: 10px;
+  }
+  
+  .water{
+    background-color: skyblue;
+    padding: 10px;
+  }
 }

@@ -41,13 +41,37 @@ defmodule BattleshipWeb.TableChannel do
     broadcast socket, "board", state
     {:noreply, socket}
   end
+
   def handle_in("place", payload, socket) do
     table_id = socket.assigns[:table_id]
     user_id = socket.assigns[:user_id]
     state = Battleship.GameAgent.add_ship(table_id, user_id, payload["side"], payload["name"], payload["cells"])
-    IO.puts("state: ")
-    IO.inspect(state)
     broadcast socket, "board", state
+    {:noreply, socket}
+  end
+  def handle_in("fire", payload, socket) do
+    table_id = socket.assigns[:table_id]
+    user_id = socket.assigns[:user_id]
+    state = Battleship.GameAgent.fire(table_id, user_id, payload["side"], payload["pos"])
+    broadcast socket, "board", state
+    {:noreply, socket}
+  end
+
+  # Remove enemy shops from state
+  intercept ["board"]
+  def handle_out("board", payload, socket) do
+    # IO.puts("state(intercept): ")
+    # IO.inspect(payload)
+    user_id = socket.assigns[:user_id]
+    if(Map.get(payload.left, :user) != user_id) do
+      left = Map.put(payload.left, :ships, nil)
+      payload = Map.put(payload, :left, left)
+    end
+    if(Map.get(payload.right, :user) != user_id) do
+      right = Map.put(payload.right, :ships, nil)
+      payload = Map.put(payload, :right, right)
+    end
+    push socket, "board", payload
     {:noreply, socket}
   end
 

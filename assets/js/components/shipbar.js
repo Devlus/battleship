@@ -17,18 +17,24 @@ export default class ShipBar extends React.Component {
     }
   }
   render() {
-    return (
-      <div>
-        <div className="form form-inline mb-3">
-          <label className="mr-2" >Vertical?</label>
-          <input className="form-control" onChange={(e)=>this.props.onOrientationChange(e.target.checked)} type="checkbox" value={this.state.vertical}/>
+    debugger;
+    const hide = !this.props.ships || !Object.values(this.props.ships).filter(x=>x)
+    if(hide){
+      return null;
+    }else{
+      return (
+        <div>
+          <div className="form form-inline mb-3">
+            <label className="mr-2" >Vertical?</label>
+            <input className="form-control" onChange={(e)=>this.props.onOrientationChange(e.target.checked)} type="checkbox" value={this.state.vertical}/>
+          </div>
+          {this.renderButton("five")}
+          {this.renderButton("four")}
+          {this.renderButton("three_1")}
+          {this.renderButton("three_2")}
+          {this.renderButton("two")}
         </div>
-        {this.renderButton("five")}
-        {this.renderButton("four")}
-        {this.renderButton("three_1")}
-        {this.renderButton("three_2")}
-        {this.renderButton("two")}
-      </div>
-    );
+      );
+    }
   }
 };

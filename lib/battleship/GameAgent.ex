@@ -19,6 +19,7 @@ defmodule Battleship.GameAgent do
   def claim_side(id, side) do
     GenServer.call({:via, Battleship.Registry, {:id, id}}, {:claim, side})
   end
+  
 
   def get(id, key) do
     GenServer.call({:via, Battleship.Registry, {:id, id}}, {:get, key})
@@ -32,6 +33,9 @@ defmodule Battleship.GameAgent do
   end
   def add_ship(id, user_id, side, shipName, cells) do
     GenServer.call({:via, Battleship.Registry, {:id, id}}, {:place, user_id, side, shipName, cells })
+  end
+  def fire(id, user_id, side, pos) do
+    GenServer.call({:via, Battleship.Registry, {:id, id}}, {:fire, user_id, side, pos })
   end
 
   ## Process Implementation
@@ -63,14 +67,78 @@ defmodule Battleship.GameAgent do
     #only let the owner place ships
     if(state_side.user == user_id) do
       if(is_nil(Map.get(state_side.ships, shipName))) do
-        IO.inspect(cells)
         state_side = %{state_side | ships: Map.put(state_side.ships, shipName, cells)}
+        if(Enum.all?(Map.values(state_side.ships), fn(x)-> !is_nil(x) end)) do
+          state_side = %{state_side | donePlacing: true}
+          IO.puts("done placing")
+        end
       end
     end
     state = Map.put(state, side, state_side)
     {:reply, state, state}
   end
+  def flattenValuesOneLevel(map)do
+    vals = Map.values(map)
+    Enum.reduce(vals,[],fn (x,acc) -> acc ++ x end)    
+  end
 
+  def get_opposite(sym) do
+    case sym do
+      :left ->
+         :right
+      :right ->
+         :left
+    end
+  end
+
+  # def handle_call({:fire, user_id, side, pos}, _from, state) do
+  #   side = String.to_atom(side)
+  #   state_side = Map.get(state, side)
+  #   enemy_side = get_opposite(side)
+  #   enemy_state_side = Map.get(state, enemy_side)
+  #   #Make sure request is from the player
+  #   if(state_side.user == user_id) do
+  #     shipsCoords = flattenValuesOneLevel(Map.get(enemy_state_side, :ships))
+  #     IO.puts("COORDS: ")
+  #     IO.inspect(shipsCoords)
+  #     IO.inspect(pos)
+  #     if(Enum.any?(shipsCoords, fn x -> x == pos end)) do
+  #       enemy_state_side = %{enemy_state_side | hits: [pos | enemy_state_side.hits]}
+  #       state = Map.put(state, enemy_side, enemy_state_side)  
+  #     else
+  #       state_side = %{state_side | misses: [pos | state_side.misses]}
+  #       state = Map.put(state, side, state_side)  
+  #     end
+  #   end
+  #   {:reply, state, state}
+  # end
+
+  def handle_call({:fire, user_id, side, pos}, _from, state) do
+    enemy_side = String.to_atom(side)
+    enemy_state_side = Map.get(state, enemy_side)
+    my_side = get_opposite(enemy_side)
+    my_state_side = Map.get(state, my_side)
+    IO.puts("My: ")
+    IO.inspect(my_state_side)
+    IO.puts("Enemy: ")
+    IO.inspect(enemy_state_side)
+
+    #Make sure request is from the player
+    if(my_state_side.user == user_id) do
+      shipsCoords = flattenValuesOneLevel(Map.get(enemy_state_side, :ships))
+      IO.puts("COORDS: ")
+      IO.inspect(shipsCoords)
+      IO.inspect(pos)
+      if(Enum.any?(shipsCoords, fn x -> x == pos end)) do
+        enemy_state_side = %{enemy_state_side | hits: [pos | enemy_state_side.hits]}
+        state = Map.put(state, enemy_side, enemy_state_side)
+      else
+        enemy_state_side = %{enemy_state_side | misses: [pos | enemy_state_side.misses]}
+        state = Map.put(state, enemy_side, enemy_state_side)
+      end
+    end
+    {:reply, state, state}
+  end
 
 
 

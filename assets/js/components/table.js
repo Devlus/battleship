@@ -33,7 +33,11 @@ export default class Table extends React.Component {
   claimed(side) {
     this.channel.push("claim", {side: side})
   }
-
+  
+  fire(side, x,y){
+    console.log("firing")
+    this.channel.push("fire",{side: side, pos: [x,y]})
+  }
   placeShip(side, shipName, cells){
     this.channel.push("place", {side: side, name: shipName, cells: cells})
   }
@@ -45,7 +49,9 @@ export default class Table extends React.Component {
           <Board
             board={this.state.leftBoard}
             onClaimed={()=>this.claimed("left")}
+            onFire={(x,y)=>this.fire("left",x,y)}
             onPlaceShip={(ship, cells)=>this.placeShip("left", ship, cells)}
+            enemySide={this.state.leftBoard.user != this.state.userId}
             className={"col md-6"}/>
         </div>
         <div className={"col md-6"}>
@@ -53,6 +59,8 @@ export default class Table extends React.Component {
             board={this.state.rightBoard}
             onPlaceShip={(ship, cells)=>this.placeShip("right", ship, cells)}
             onClaimed={()=>this.claimed("right")}
+            onFire={(x,y)=>this.fire("right",x,y)}
+            enemySide={this.state.rightBoard.user != this.state.userId}
             className={"col md-6"}/>
         </div>
       </div>

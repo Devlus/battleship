@@ -15,25 +15,29 @@ export default class Board extends React.Component {
     this.state = {
       grid: Array(10).fill(Array(10).fill(0)),
       placing: null,
-      vertical: false
+      vertical: false,
     };
   }
   pressed(x, y) {
     debugger;
-    let cells = [[x, y]];
-    //If placing a ship, and that ship has not been placed yet
-    if (this.state.placing && !this.props.board.ships[this.state.placing]) {
-      const n = this.sizeMap[this.state.placing]
-      //determine ship cells
-      for (let i = 1; i < n; i++) {
-        if (this.state.vertical) {
-          cells.push([x, y + i])
-        } else {
-          cells.push([x + i, y])
+    if(this.props.board.donePlacing){
+      this.props.onFire(x,y)
+    }else{
+      let cells = [[x, y]];
+      //If placing a ship, and that ship has not been placed yet
+      if (this.state.placing && !this.props.board.ships[this.state.placing]) {
+        const n = this.sizeMap[this.state.placing]
+        //determine ship cells
+        for (let i = 1; i < n; i++) {
+          if (this.state.vertical) {
+            cells.push([x, y + i])
+          } else {
+            cells.push([x + i, y])
+          }
         }
       }
+      this.props.onPlaceShip(this.state.placing, cells)
     }
-    this.props.onPlaceShip(this.state.placing, cells)
   }
   getCoordArray(boatMap){
     let coords = [];
@@ -44,15 +48,33 @@ export default class Board extends React.Component {
     }
     return coords;
   }
-  inBoat(pos, coords){
+  inList(pos, coords){
     return coords.find(x => x[0] == pos[0] && x[1] == pos[1]);
   }
 
   renderCell(x,y, coords){
-    if(this.inBoat([x,y], coords)){
-      return (<span>B</span>)
+    if(this.props.enemySide){
+      //Render water and misses
+      if(this.inList([x,y], this.props.board.misses)){
+        return (<span className={"miss"}>O</span>);  
+      }
+      if(this.inList([x,y], this.props.board.hits)){
+        return (<span className={"hit"}>O</span>);  
+      }
+      if(this.props.board.donePlacing){
+        return (<button onClick={() => this.pressed(x, y)} className={"btn btn-info"}>O</button>);
+      }else{
+        return (<span className={"water"}>O</span>);
+      }
+    }
+    if(this.inList([x,y], coords)){
+      return (<span className={"boat"} >O</span>)
     }else{
-      return (<button onClick={() => this.pressed(x, y)}>{x},{y}</button>);
+      if(this.props.board.donePlacing){
+        return (<span className={"water"}>O</span>);
+      }else{
+        return (<button className="btn btn-success" onClick={() => this.pressed(x, y)}>{x},{y}</button>);
+      }
     }
   }
 
@@ -76,7 +98,6 @@ export default class Board extends React.Component {
   
   placing(shipName) {
     console.log(shipName);
-
     this.setState({placing: shipName})
   }
 
