@@ -52,26 +52,32 @@ export default class Board extends React.Component {
     return coords.find(x => x[0] == pos[0] && x[1] == pos[1]);
   }
 
-  renderCell(x,y, coords){
+  renderCell(x,y, shipCoords){
     if(this.props.enemySide){
       //Render water and misses
       if(this.inList([x,y], this.props.board.misses)){
-        return (<span className={"miss"}>O</span>);  
+        return (<div className={"miss"}>M</div>);  
       }
       if(this.inList([x,y], this.props.board.hits)){
-        return (<span className={"hit"}>O</span>);  
+        return (<div className={"hit"}>H</div>);  
       }
       if(this.props.board.donePlacing){
         return (<button onClick={() => this.pressed(x, y)} className={"btn btn-info"}>O</button>);
       }else{
-        return (<span className={"water"}>O</span>);
+        return (<div className={"water"}>O</div>);
       }
     }
-    if(this.inList([x,y], coords)){
-      return (<span className={"boat"} >O</span>)
-    }else{
+    if(this.inList([x,y], shipCoords)){
+      if(this.inList([x,y],this.props.board.hits)){
+        return (<div className={"boat dmg"}>X</div>)
+      }
+      return (<div className={"boat"}>O</div>)
+      } 
+      else if(this.inList([x,y],this.props.board.misses)){
+        return (<div className={"miss"}>M</div>);
+      }else{
       if(this.props.board.donePlacing){
-        return (<span className={"water"}>O</span>);
+        return (<div className={"water"}>O</div>);
       }else{
         return (<button className="btn btn-success" onClick={() => this.pressed(x, y)}>{x},{y}</button>);
       }
@@ -100,6 +106,15 @@ export default class Board extends React.Component {
     console.log(shipName);
     this.setState({placing: shipName})
   }
+  renderShipBar(){
+    if(!this.props.board.donePlacing){
+      return (<ShipBar
+        ships={this.props.board.ships}
+        onOrientationChange={this.orientationChange.bind(this)}
+        onPlacing={this.placing.bind(this)}/>);
+    }
+    return null;
+  }
 
   render() {
     if (!this.props.board || !this.props.board.user) {
@@ -109,10 +124,7 @@ export default class Board extends React.Component {
     } else {
       return (
         <div>
-          <ShipBar
-            ships={this.props.board.ships}
-            onOrientationChange={this.orientationChange.bind(this)}
-            onPlacing={this.placing.bind(this)}/>
+          {this.renderShipBar()}
           {this.renderTable()}
         </div>
       )
