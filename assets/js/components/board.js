@@ -18,24 +18,48 @@ export default class Board extends React.Component {
       vertical: false,
     };
   }
+  checkCell(pos){
+    if(pos[0] < 0 || pos[0] > 9){
+      debugger;
+      return false;
+    } 
+    if(pos[1] < 0 || pos[1] > 9){
+      debugger;
+      return false;
+    } 
+    return true;
+  }
+
   pressed(x, y) {
-    debugger;
     if(this.props.board.donePlacing){
       this.props.onFire(x,y)
-    }else{
+    }else if(this.state.placing) {
       let cells = [[x, y]];
+      const coords = this.getCoordArray(this.props.board.ships);
       //If placing a ship, and that ship has not been placed yet
-      if (this.state.placing && !this.props.board.ships[this.state.placing]) {
+      if (!this.props.board.ships[this.state.placing]) {
         const n = this.sizeMap[this.state.placing]
         //determine ship cells
         for (let i = 1; i < n; i++) {
           if (this.state.vertical) {
-            cells.push([x, y + i])
+            let cell = [x, y + i];
+            //Boat already overlap with this cell, reject
+            if(this.inList(cell, coords) || !this.checkCell(cell)){
+              return;
+            }
+            cells.push(cell)
           } else {
-            cells.push([x + i, y])
+            let cell = [x + i, y];
+            //Boat already overlap with this cell, reject
+            if(this.inList(cell, coords) || !this.checkCell(cell)){
+              return;
+            }
+            cells.push(cell)
           }
         }
       }
+      
+      
       this.props.onPlaceShip(this.state.placing, cells)
     }
   }
@@ -88,6 +112,7 @@ export default class Board extends React.Component {
     const coords = this.getCoordArray(this.props.board.ships);
     return (
       <table>
+        <tbody>
         {this.state.grid.map((y, j) => (
             <tr>{y.map((x, i) => (
                 <td className={"cell"}>
@@ -95,6 +120,7 @@ export default class Board extends React.Component {
                 </td>
               ))}</tr>
           ))}
+          </tbody>
       </table>
     );
   }

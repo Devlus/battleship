@@ -17,7 +17,6 @@ export default class ShipBar extends React.Component {
     }
   }
   render() {
-    debugger;
     const hide = !this.props.ships || !Object.values(this.props.ships).filter(x=>x)
     if(hide){
       return null;
