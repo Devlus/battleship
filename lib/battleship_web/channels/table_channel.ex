@@ -49,13 +49,68 @@ defmodule BattleshipWeb.TableChannel do
     broadcast socket, "board", state
     {:noreply, socket}
   end
+  def count(state, sideSym, attr) do
+    Enum.count(Map.get(Map.get(state, sideSym), attr))
+  end
+  def bothDone(state) do
+    cond do
+      count(state, :left, :misses) == count(state, :right, :misses) ->
+        :draw
+      count(state, :left, :misses) < count(state, :right, :misses) ->
+        :left
+      count(state, :left, :misses) > count(state, :right, :misses) ->
+        :right
+    end
+  end
+  def checkOneDone(state) do
+    cond do
+      count(state, :left, :hits) == 17 ->
+        #if the total shots for left to complete is less than the current number of turns of the enemy, win
+        if(count(state, :left, :misses) + 17 < (count(state, :right, :misses) + count(state, :right, :hits))) do
+          :left
+        else
+          :ongoing
+        end
+      count(state, :right, :hits) == 17 ->
+        if(count(state, :right, :misses) + 17 < (count(state, :left, :misses) + count(state, :left, :hits))) do
+          :right
+        else
+          :ongoing
+        end
+    end
+  end
+  def checkWinner(state) do
+    cond do
+      (count(state, :left, :hits) == 17 && count(state, :right, :hits) == 17) ->
+        bothDone(state)
+      (count(state, :left, :hits) == 17 || count(state, :right, :hits) == 17) ->
+        checkOneDone(state)
+      true-> :ongoing
+    end
+  end
   def handle_in("fire", payload, socket) do
     table_id = socket.assigns[:table_id]
     user_id = socket.assigns[:user_id]
     state = Battleship.GameAgent.fire(table_id, user_id, payload["side"], payload["pos"])
     broadcast socket, "board", state
+    
+    #Gets the winning side, winner is playing the opposite
+    case checkWinner(state) do
+      :ongoing -> nil
+      :left -> broadcast socket, "game_over", %{winner: :right}
+      :right -> broadcast socket, "game_over", %{winner: :left}
+      :draw -> broadcast socket, "game_over", %{winner: :draw}
+    end
     {:noreply, socket}
   end
+  def handle_in("reset", payload, socket) do
+    table_id = socket.assigns[:table_id]
+    user_id = socket.assigns[:user_id]
+    state = Battleship.GameAgent.reset_table(table_id)
+    broadcast socket, "board", state
+    {:noreply, socket}
+  end
+
 
   # Remove enemy shops from state
   intercept ["board"]

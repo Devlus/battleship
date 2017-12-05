@@ -37,9 +37,18 @@ defmodule Battleship.GameAgent do
   def fire(id, user_id, side, pos) do
     GenServer.call({:via, Battleship.Registry, {:id, id}}, {:fire, user_id, side, pos })
   end
+  def reset_table(id) do
+    GenServer.call({:via, Battleship.Registry, {:id, id}}, {:reset})
+  end
 
   ## Process Implementation
   def handle_call({:state}, _from, state) do
+    {:reply, state, state}
+  end
+  
+  def handle_call({:reset}, _from, state) do
+    state = Map.put(state, :left, %BoardState{})
+    state = Map.put(state, :right, %BoardState{})
     {:reply, state, state}
   end
 
@@ -90,28 +99,6 @@ defmodule Battleship.GameAgent do
          :left
     end
   end
-
-  # def handle_call({:fire, user_id, side, pos}, _from, state) do
-  #   side = String.to_atom(side)
-  #   state_side = Map.get(state, side)
-  #   enemy_side = get_opposite(side)
-  #   enemy_state_side = Map.get(state, enemy_side)
-  #   #Make sure request is from the player
-  #   if(state_side.user == user_id) do
-  #     shipsCoords = flattenValuesOneLevel(Map.get(enemy_state_side, :ships))
-  #     IO.puts("COORDS: ")
-  #     IO.inspect(shipsCoords)
-  #     IO.inspect(pos)
-  #     if(Enum.any?(shipsCoords, fn x -> x == pos end)) do
-  #       enemy_state_side = %{enemy_state_side | hits: [pos | enemy_state_side.hits]}
-  #       state = Map.put(state, enemy_side, enemy_state_side)  
-  #     else
-  #       state_side = %{state_side | misses: [pos | state_side.misses]}
-  #       state = Map.put(state, side, state_side)  
-  #     end
-  #   end
-  #   {:reply, state, state}
-  # end
 
   def handle_call({:fire, user_id, side, pos}, _from, state) do
     enemy_side = String.to_atom(side)
