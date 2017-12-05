@@ -1,0 +1,20 @@
+[Unit]
+Description=Battleship Server
+After=network.target
+
+[Service]
+Type=forking
+User=battleship
+Group=battleship
+WorkingDirectory=/home/battleship/battleship
+ExecStart=/home/battleship/battleship/bin/battleship start
+ExecStop=/home/battleship/battleship/bin/battleship stop
+Restart=on-failure
+RestartSec=5
+Environment=PORT=6060
+Environment=LANG=en_US.UTF-8
+SyslogIdentifier=battleship
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+rm -r ./battleship/*
+cd battleship
+tar xzvf ../battleship.tar.gz
+./bin/battleship migrate
+echo "Be sure to update the version in sites-available if css is messed up"
+rm ../battleship.tar.gz
